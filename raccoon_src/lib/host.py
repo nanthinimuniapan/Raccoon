@@ -53,12 +53,11 @@ class Host:
             try:
                 self.port = int(self.port)
             except ValueError:
-                # Probably has a path after the port, e.g - localhost:3000/home.asp
+                # Probably has a path after the port, e.g -
+                # localhost:3000/home.asp
                 raise HostHandlerException(
                     "Failed to parse port {}. Is there a path after it ?".format(
-                        self.port
-                    )
-                )
+                        self.port))
             self.logger.info(
                 "{} Port detected: {}".format(COLORED_COMBOS.NOTIFY, self.port)
             )
@@ -155,19 +154,19 @@ class Host:
                     self.naked = self.target
 
             try:
-                self.dns_results = DNSHandler.query_dns(domains, self.dns_records)
+                self.dns_results = DNSHandler.query_dns(
+                    domains, self.dns_records)
             except Timeout:
                 raise HostHandlerException(
                     "DNS Query timed out. Maybe target has DNS protection ?"
                 )
 
             if self.dns_results.get("CNAME"):
-                # Naked domains shouldn't hold CNAME records according to RFC regulations
+                # Naked domains shouldn't hold CNAME records according to RFC
+                # regulations
                 self.logger.info(
                     "{} Found {} to be an FQDN by CNAME presence in DNS records".format(
-                        COLORED_COMBOS.NOTIFY, self.target
-                    )
-                )
+                        COLORED_COMBOS.NOTIFY, self.target))
 
                 self.fqdn = self.target
                 self.naked = ".".join(self.fqdn.split(".")[1:])

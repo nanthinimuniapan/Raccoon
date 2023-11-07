@@ -25,12 +25,12 @@ MY_PATH = os.path.abspath(os.path.dirname(__file__))
 def intro(logger):
     logger.info(
         """{}
- _____                _____    _____    ____     ____    _   _ 
-|  __ \      /\      / ____|  / ____|  / __ \   / __ \  | \ | |
-| |__) |    /  \    | |      | |      | |  | | | |  | | |  \| |
-|  _  /    / /\ \   | |      | |      | |  | | | |  | | | . ` |
-| | \ \   / ____ \  | |____  | |____  | |__| | | |__| | | |\  |
-|_|  \_\ /_/    \_\  \_____|  \_____|  \____/   \____/  |_| \_|
+ _____                _____    _____    ____     ____    _   _
+|  __ \\      /\\      / ____|  / ____|  / __ \\   / __ \\  | \\ | |
+| |__) |    /  \\    | |      | |      | |  | | | |  | | |  \\| |
+|  _  /    / /\\ \\   | |      | |      | |  | | | |  | | | . ` |
+| | \\ \\   / ____ \\  | |____  | |____  | |__| | | |__| | | |\\  |
+|_|  \\_\\ /_/    \\_\\  \\_____|  \\_____|  \\____/   \\____/  |_| \\_|
 {}
 
 4841434b414c4c5448455448494e4753
@@ -71,21 +71,19 @@ https://github.com/evyatarmeged/Raccoon
     "Should be in the form of key:value\n"
     "Example: PHPSESSID:12345,isMobile:false",
 )
-@click.option(
-    "--proxy", help="Proxy address to route HTTP traffic through. Slows total runtime"
-)
+@click.option("--proxy",
+              help="Proxy address to route HTTP traffic through. Slows total runtime")
 @click.option(
     "-w",
     "--wordlist",
     default=os.path.join(MY_PATH, "wordlists/fuzzlist"),
     help="Path to wordlist that would be used for URL fuzzing",
 )
-@click.option(
-    "-T",
-    "--threads",
-    default=25,
-    help="Number of threads to use for URL Fuzzing/Subdomain enumeration. Default: 25",
-)
+@click.option("-T",
+              "--threads",
+              default=25,
+              help="Number of threads to use for URL Fuzzing/Subdomain enumeration. Default: 25",
+              )
 @click.option(
     "--ignored-response-codes",
     default="302,400,401,402,403,404,503,504",
@@ -97,14 +95,14 @@ https://github.com/evyatarmeged/Raccoon
     default=os.path.join(MY_PATH, "wordlists/subdomains"),
     help="Path to subdomain list file that would be used for enumeration",
 )
-@click.option("-sc", "--scripts", is_flag=True, help="Run Nmap scan with -sC flag")
-@click.option("-sv", "--services", is_flag=True, help="Run Nmap scan with -sV flag")
-@click.option(
-    "-f", "--full-scan", is_flag=True, help="Run Nmap scan with both -sV and -sC"
-)
-@click.option(
-    "-p", "--port", help="Use this port range for Nmap scan instead of the default"
-)
+@click.option("-sc", "--scripts", is_flag=True,
+              help="Run Nmap scan with -sC flag")
+@click.option("-sv", "--services", is_flag=True,
+              help="Run Nmap scan with -sV flag")
+@click.option("-f", "--full-scan", is_flag=True,
+              help="Run Nmap scan with both -sV and -sC")
+@click.option("-p", "--port",
+              help="Use this port range for Nmap scan instead of the default")
 @click.option(
     "--vulners-nmap-scan",
     is_flag=True,
@@ -124,15 +122,15 @@ https://github.com/evyatarmeged/Raccoon
     default=False,
     help="Follow redirects when fuzzing. Default: False (will not follow redirects)",
 )
-@click.option(
-    "--tls-port", default=443, help="Use this port for TLS queries. Default: 443"
-)
-@click.option(
-    "--skip-health-check", is_flag=True, help="Do not test for target host availability"
-)
+@click.option("--tls-port", default=443,
+              help="Use this port for TLS queries. Default: 443")
+@click.option("--skip-health-check", is_flag=True,
+              help="Do not test for target host availability")
 @click.option("--no-url-fuzzing", is_flag=True, help="Do not fuzz URLs")
-@click.option("--no-sub-enum", is_flag=True, help="Do not bruteforce subdomains")
-@click.option("--skip-nmap-scan", is_flag=True, help="Do not perform an Nmap scan")
+@click.option("--no-sub-enum", is_flag=True,
+              help="Do not bruteforce subdomains")
+@click.option("--skip-nmap-scan", is_flag=True,
+              help="Do not perform an Nmap scan")
 # @click.option("-d", "--delay", default="0.25-1",
 #               help="Min and Max number of seconds of delay to be waited between requests\n"
 #                    "Defaults to Min: 0.25, Max: 1. Specified in the format of Min-Max")
@@ -183,17 +181,19 @@ def main(
         except RaccoonException as e:
             logger.critical(str(e))
             exit(9)
-        HelpUtilities.validate_wordlist_args(proxy_list, wordlist, subdomain_list)
+        HelpUtilities.validate_wordlist_args(
+            proxy_list, wordlist, subdomain_list)
         HelpUtilities.validate_proxy_args(tor_routing, proxy, proxy_list)
         HelpUtilities.create_output_directory(outdir)
 
         if tor_routing:
             logger.info(
-                "{} Testing that Tor service is up...".format(COLORED_COMBOS.NOTIFY)
-            )
+                "{} Testing that Tor service is up...".format(
+                    COLORED_COMBOS.NOTIFY))
         elif proxy_list:
             if proxy_list and not os.path.isfile(proxy_list):
-                raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
+                raise FileNotFoundError(
+                    "Not a valid file path, {}".format(proxy_list))
             else:
                 logger.info(
                     "{} Routing traffic using proxies from list {}\n".format(
@@ -223,7 +223,11 @@ def main(
             try:
                 cookies = HelpUtilities.parse_cookie_arg(cookies)
             except RaccoonException as e:
-                logger.critical("{}{}{}".format(COLOR.RED, str(e), COLOR.RESET))
+                logger.critical(
+                    "{}{}{}".format(
+                        COLOR.RED,
+                        str(e),
+                        COLOR.RESET))
                 exit(2)
 
         # Set Request Handler instance
@@ -239,9 +243,7 @@ def main(
                 HelpUtilities.confirm_traffic_routs_through_tor()
                 logger.info(
                     "{} Validated Tor service is up. Routing traffic anonymously\n".format(
-                        COLORED_COMBOS.NOTIFY
-                    )
-                )
+                        COLORED_COMBOS.NOTIFY))
             except RaccoonException as err:
                 print("{}{}{}".format(COLOR.RED, str(err), COLOR.RESET))
                 exit(3)
@@ -249,8 +251,8 @@ def main(
         main_loop = asyncio.get_event_loop()
 
         logger.info(
-            "{}### Raccoon Scan Started ###{}\n".format(COLOR.GRAY, COLOR.RESET)
-        )
+            "{}### Raccoon Scan Started ###{}\n".format(
+                COLOR.GRAY, COLOR.RESET))
         logger.info(
             "{} Trying to gather information about host: {}".format(
                 COLORED_COMBOS.INFO, target
@@ -270,16 +272,18 @@ def main(
             try:
                 HelpUtilities.validate_target_is_up(host)
             except RaccoonException as err:
-                logger.critical("{}{}{}".format(COLOR.RED, str(err), COLOR.RESET))
+                logger.critical(
+                    "{}{}{}".format(
+                        COLOR.RED,
+                        str(err),
+                        COLOR.RESET))
                 exit(42)
 
         if not skip_nmap_scan:
             if vulners_nmap_scan:
                 logger.info(
                     "\n{} Setting NmapVulners scan to run in the background".format(
-                        COLORED_COMBOS.INFO
-                    )
-                )
+                        COLORED_COMBOS.INFO))
                 nmap_vulners_scan = NmapVulnersScan(
                     host=host, port_range=port, vulners_path=vulners_path
                 )
@@ -302,7 +306,8 @@ def main(
                     services=services,
                 )
 
-                nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan,))
+                nmap_thread = threading.Thread(
+                    target=Scanner.run, args=(nmap_scan,))
                 # Run Nmap scan in the background. Can take some time
                 nmap_thread.start()
 
@@ -325,8 +330,11 @@ def main(
         # Second set of checks - URL fuzzing, Subdomain enumeration
         if not no_url_fuzzing:
             fuzzer = URLFuzzer(
-                host, ignored_response_codes, threads, wordlist, follow_redirects
-            )
+                host,
+                ignored_response_codes,
+                threads,
+                wordlist,
+                follow_redirects)
             main_loop.run_until_complete(fuzzer.fuzz_all())
 
         if not host.is_ip:
@@ -347,20 +355,21 @@ def main(
                 logger.info(
                     "{} All scans done. Waiting for Nmap scan to wrap up. "
                     "Time left may vary depending on scan type and port range".format(
-                        COLORED_COMBOS.INFO
-                    )
-                )
+                        COLORED_COMBOS.INFO))
 
                 while nmap_thread.is_alive():
                     time.sleep(15)
 
         logger.info(
-            "\n{}### Raccoon scan finished ###{}\n".format(COLOR.GRAY, COLOR.RESET)
-        )
+            "\n{}### Raccoon scan finished ###{}\n".format(
+                COLOR.GRAY, COLOR.RESET))
         os.system("stty sane")
 
     except KeyboardInterrupt:
-        print("{}Keyboard Interrupt detected. Exiting{}".format(COLOR.RED, COLOR.RESET))
+        print(
+            "{}Keyboard Interrupt detected. Exiting{}".format(
+                COLOR.RED,
+                COLOR.RESET))
         # Fix F'd up terminal after CTRL+C
         os.system("stty sane")
         exit(42)

@@ -40,7 +40,8 @@ class DNSHandler:
             return
 
         script = "whois {}".format(host.naked).split()
-        log_file = HelpUtilities.get_output_path("{}/whois.txt".format(host.target))
+        log_file = HelpUtilities.get_output_path(
+            "{}/whois.txt".format(host.target))
         logger = Logger(log_file)
 
         process = await create_subprocess_exec(*script, stdout=PIPE, stderr=PIPE)
@@ -48,8 +49,8 @@ class DNSHandler:
 
         if process.returncode == 0:
             logger.info(
-                "{} {} WHOIS information retrieved".format(COLORED_COMBOS.GOOD, host)
-            )
+                "{} {} WHOIS information retrieved".format(
+                    COLORED_COMBOS.GOOD, host))
             for line in result.decode().strip().split("\n"):
                 if ":" in line:
                     logger.debug(line)
@@ -79,6 +80,4 @@ class DNSHandler:
         except RaccoonException:
             sout_logger.info(
                 "{} Failed to generate DNS mapping. A connection error occurred.".format(
-                    COLORED_COMBOS.BAD
-                )
-            )
+                    COLORED_COMBOS.BAD))

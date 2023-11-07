@@ -34,20 +34,24 @@ class SubDomainEnumerator:
         self.logger = Logger(log_file)
 
     async def run(self):
-        self.logger.info("{} Enumerating Subdomains".format(COLORED_COMBOS.INFO))
+        self.logger.info(
+            "{} Enumerating Subdomains".format(
+                COLORED_COMBOS.INFO))
         if self.sans:
             self._extract_from_sans()
         self._google_dork()
         self._extract_from_dns_dumpster()
         if not self.no_sub_enum:
             await self.bruteforce()
-        self.logger.info("{} Done enumerating Subdomains".format(COLORED_COMBOS.INFO))
+        self.logger.info(
+            "{} Done enumerating Subdomains".format(
+                COLORED_COMBOS.INFO))
 
     def _extract_from_sans(self):
         """Looks for different TLDs as well as different sub-domains in SAN list"""
         self.logger.info(
-            "{} Trying to find Subdomains in SANs list".format(COLORED_COMBOS.NOTIFY)
-        )
+            "{} Trying to find Subdomains in SANs list".format(
+                COLORED_COMBOS.NOTIFY))
         if self.host.naked:
             domain = self.host.naked
             tld_less = domain.split(".")[0]
@@ -63,13 +67,13 @@ class SubDomainEnumerator:
                 and not san.startswith("*")
             ):
                 self.logger.info(
-                    "{} Subdomain detected: {}".format(COLORED_COMBOS.GOOD, san)
-                )
+                    "{} Subdomain detected: {}".format(
+                        COLORED_COMBOS.GOOD, san))
 
     def _google_dork(self):
         self.logger.info(
-            "{} Trying to discover subdomains in Google".format(COLORED_COMBOS.NOTIFY)
-        )
+            "{} Trying to discover subdomains in Google".format(
+                COLORED_COMBOS.NOTIFY))
         page = self.request_handler.send(
             "GET",
             url="https://www.google.com/search?q=site:{}&num=100".format(self.target),
@@ -118,7 +122,9 @@ class SubDomainEnumerator:
         if self.host.naked:
             self.host.target = self.host.naked
 
-        self.logger.info("{} Bruteforcing subdomains".format(COLORED_COMBOS.NOTIFY))
+        self.logger.info(
+            "{} Bruteforcing subdomains".format(
+                COLORED_COMBOS.NOTIFY))
         sub_domain_fuzzer = URLFuzzer(
             host=self.host,
             path_to_wordlist=self.domain_list,

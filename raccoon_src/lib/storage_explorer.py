@@ -19,7 +19,8 @@ class Storage:
         self.request_handler = RequestHandler()
         self.storage_urls_found = set()
         self.num_files_found = 0
-        file_list_path = os.path.join(MY_PATH, "../wordlists/storage_sensitive")
+        file_list_path = os.path.join(
+            MY_PATH, "../wordlists/storage_sensitive")
         with open(file_list_path, "r") as file:
             files = file.readlines()
             self.sensitive_files = [x.replace("\n", "") for x in files]
@@ -52,15 +53,12 @@ class AmazonS3Handler(Storage):
 
     def _is_s3_url(self, src):
         # Not including third party Amazon host services - aka cdn.3rdparty.com
-        return any(
-            (
-                "s3" in src and "amazonaws" in src,
-                "cdn.{}".format(str(self.host.naked)) in src,
-                "cdn.{}".format(self.host.target) in src,
-                "cdn.{}".format(".".join(self.host.target.split(".")[1:])) in src,
-                "cloudfront.net" in src,
-            )
-        )
+        return any(("s3" in src and "amazonaws" in src,
+                    "cdn.{}".format(str(self.host.naked)) in src,
+                    "cdn.{}".format(self.host.target) in src,
+                    "cdn.{}".format(".".join(self.host.target.split(".")[1:])) in src,
+                    "cloudfront.net" in src,
+                    ))
 
     @staticmethod
     def _is_amazon_s3_bucket(res):
@@ -68,7 +66,8 @@ class AmazonS3Handler(Storage):
 
     def _test_s3_bucket_permissions(self, bucket):
         try:
-            bucket_url = [part for part in bucket.no_scheme_url.split("/") if part]
+            bucket_url = [
+                part for part in bucket.no_scheme_url.split("/") if part]
             bucket_len = len(bucket_url)
 
             for i in range(bucket_len - 1):
@@ -85,9 +84,7 @@ class AmazonS3Handler(Storage):
                 ):
                     self.logger.info(
                         "{} Vulnerable S3 bucket detected: {}{}{}. Enumerating sensitive files".format(
-                            COLORED_COMBOS.GOOD, COLOR.RED, url, COLOR.RESET
-                        )
-                    )
+                            COLORED_COMBOS.GOOD, COLOR.RED, url, COLOR.RESET))
                     bucket.vulnerable = True
                     self._scan_for_sensitive_files(res.text, url)
 
@@ -101,7 +98,9 @@ class AmazonS3Handler(Storage):
             key = el.get("Key")
             for file in self.sensitive_files:
                 if file in key:
-                    self.logger.debug("Found {} file in bucket {}".format(key, url))
+                    self.logger.debug(
+                        "Found {} file in bucket {}".format(
+                            key, url))
                     self.num_files_found += 1
 
 
@@ -125,7 +124,10 @@ class S3Bucket:
         return "".join([part for part in url.split("//") if part])
 
 
-class StorageExplorer(AmazonS3Handler, GoogleStorageHandler, AzureStorageHandler):
+class StorageExplorer(
+        AmazonS3Handler,
+        GoogleStorageHandler,
+        AzureStorageHandler):
     """
     Find and test privileges of target cloud storage and look for sensitive files in it.
     Can lead to finding .git/.DS_Store/etc files with tokens, passwords and more.
@@ -185,20 +187,13 @@ class StorageExplorer(AmazonS3Handler, GoogleStorageHandler, AzureStorageHandler
             if self.num_files_found > 0:
                 self.logger.info(
                     "{} Found {}{}{} sensitive files in S3 buckets. inspect web scan logs for more information.".format(
-                        COLORED_COMBOS.GOOD,
-                        COLOR.GREEN,
-                        self.num_files_found,
-                        COLOR.RESET,
-                    )
-                )
+                        COLORED_COMBOS.GOOD, COLOR.GREEN, self.num_files_found, COLOR.RESET, ))
             elif any(b.vulnerable for b in self.s3_buckets):
                 self.logger.info(
                     "{} No sensitive files found in target's cloud storage".format(
-                        COLORED_COMBOS.BAD
-                    )
-                )
+                        COLORED_COMBOS.BAD))
             else:
                 self.logger.info(
                     "{} Could not access target's cloud storage."
-                    " All permissions are set properly".format(COLORED_COMBOS.BAD)
-                )
+                    " All permissions are set properly".format(
+                        COLORED_COMBOS.BAD))

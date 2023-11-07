@@ -12,7 +12,13 @@ class NmapScan:
     Start Raccoon with sudo for -sS else will run -sT
     """
 
-    def __init__(self, host, port_range, full_scan=None, scripts=None, services=None):
+    def __init__(
+            self,
+            host,
+            port_range,
+            full_scan=None,
+            scripts=None,
+            services=None):
         self.target = host.target
         self.full_scan = full_scan
         self.scripts = scripts
@@ -54,8 +60,8 @@ class NmapScan:
                 script.append("-sC")
             if self.services:
                 self.logger.info(
-                    "{} Added service scan to Nmap script".format(COLORED_COMBOS.NOTIFY)
-                )
+                    "{} Added service scan to Nmap script".format(
+                        COLORED_COMBOS.NOTIFY))
                 script.append("-sV")
         return script
 
@@ -74,7 +80,13 @@ class NmapVulnersScan(NmapScan):
         self.logger = Logger(self.path)
 
     def build_script(self):
-        script = ["nmap", "-Pn", "-sV", "--script", self.vulners_path, self.target]
+        script = [
+            "nmap",
+            "-Pn",
+            "-sV",
+            "--script",
+            self.vulners_path,
+            self.target]
 
         if self.port_range:
             HelpUtilities.validate_port_range(self.port_range)
@@ -95,8 +107,9 @@ class Scanner:
         script = scan.build_script()
 
         scan.logger.info(
-            "{} Nmap script to run: {}".format(COLORED_COMBOS.INFO, " ".join(script))
-        )
+            "{} Nmap script to run: {}".format(
+                COLORED_COMBOS.INFO,
+                " ".join(script)))
         scan.logger.info("{} Nmap scan started\n".format(COLORED_COMBOS.GOOD))
         process = Popen(script, stdout=PIPE, stderr=PIPE)
         result, err = process.communicate()
@@ -112,8 +125,7 @@ class Scanner:
         for line in result.split("\n"):
             if "PORT" in line and "STATE" in line:
                 parsed_output += "{} Nmap discovered the following ports:\n".format(
-                    COLORED_COMBOS.GOOD
-                )
+                    COLORED_COMBOS.GOOD)
             if "/tcp" in line or "/udp" in line and "open" in line:
                 line = line.split()
                 parsed_output += "\t{}{}{} {}\n".format(
@@ -137,8 +149,9 @@ class VulnersScanner(Scanner):
         out_versions, out_pure = cls._parse_vulners_output(result)
 
         out_versions = re.sub(
-            r"(\d+\/(?:tcp|udp))", COLOR.GREEN + r"\1" + COLOR.RESET, out_versions
-        )
+            r"(\d+\/(?:tcp|udp))",
+            COLOR.GREEN + r"\1" + COLOR.RESET,
+            out_versions)
         out_versions = re.sub(
             r"(\sCVE\S*)", COLOR.RED + r"\1" + COLOR.RESET, out_versions
         )
@@ -149,13 +162,10 @@ class VulnersScanner(Scanner):
         if out_pure:
             parsed_output += (
                 "{} NmapVulners discovered the following open ports:\n{}".format(
-                    COLORED_COMBOS.GOOD, out_pure
-                )
-            )
+                    COLORED_COMBOS.GOOD, out_pure))
         if out_versions:
             parsed_output += "{} NmapVulners discovered some vulnerable software within the following open ports:\n{}".format(
-                COLORED_COMBOS.GOOD, out_versions
-            )
+                COLORED_COMBOS.GOOD, out_versions)
         return parsed_output
 
     @classmethod
@@ -172,8 +182,7 @@ class VulnersScanner(Scanner):
                         r"^(\d+/(?:tcp|udp).*open.*$)[\s\S]*?(^\|.*vulners[\s\S]+?^\|_.+?$)",
                         port,
                         re.MULTILINE,
-                    )[0]
-                )
+                    )[0])
             else:
                 out_none += port
         return out_vers, out_none

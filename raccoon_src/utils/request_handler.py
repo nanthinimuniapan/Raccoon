@@ -110,7 +110,8 @@ class RequestHandler(metaclass=Singleton):
                     **kwargs
                 )
             else:
-                raise RequestHandlerException("Unsupported method: {}".format(method))
+                raise RequestHandlerException(
+                    "Unsupported method: {}".format(method))
         except ProxyError:
             # TODO: Apply fail over for bad proxies or drop them
             raise RequestHandlerException("Error connecting to proxy")
@@ -127,7 +128,8 @@ class RequestHandler(metaclass=Singleton):
                 "Infinite redirects detected - too many redirects error"
             )
         except UnicodeDecodeError:
-            # Following issue #19, apparently some sites do not use utf-8 in their uris :<>
+            # Following issue #19, apparently some sites do not use utf-8 in
+            # their uris :<>
             pass
 
     def get_new_session(self):

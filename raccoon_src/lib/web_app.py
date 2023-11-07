@@ -36,18 +36,18 @@ class WebApplicationScanner:
         Has a re-try mechanism because false negatives may occur
         :param tries: Count of tries for CMS discovery
         """
-        # WhatCMS is under CloudFlare which detects and blocks proxied/Tor traffic, hence normal request.
-        page = requests.get(url="https://whatcms.org/?s={}".format(self.host.target))
+        # WhatCMS is under CloudFlare which detects and blocks proxied/Tor
+        # traffic, hence normal request.
+        page = requests.get(
+            url="https://whatcms.org/?s={}".format(self.host.target))
         soup = BeautifulSoup(page.text, "lxml")
         found = soup.select(".panel.panel-success")
         if found:
             try:
-                cms = [a for a in soup.select("a") if "/c/" in a.get("href")][0]
-                self.logger.info(
-                    "{} CMS detected: target is using {}{}{}".format(
-                        COLORED_COMBOS.GOOD, COLOR.GREEN, cms.get("title"), COLOR.RESET
-                    )
-                )
+                cms = [a for a in soup.select(
+                    "a") if "/c/" in a.get("href")][0]
+                self.logger.info("{} CMS detected: target is using {}{}{}".format(
+                    COLORED_COMBOS.GOOD, COLOR.GREEN, cms.get("title"), COLOR.RESET))
             except IndexError:
                 if tries >= 4:
                     return
@@ -68,7 +68,8 @@ class WebApplicationScanner:
             try:
                 if domain in self.host.target or self.host.target in domain:
                     if not secure or not http_only:
-                        current = "%s Cookie: {%s} -" % (COLORED_COMBOS.GOOD, key)
+                        current = "%s Cookie: {%s} -" % (
+                            COLORED_COMBOS.GOOD, key)
                         if not secure and not http_only:
                             current += " both secure and HttpOnly flags are not set"
                         elif not secure:
@@ -106,9 +107,7 @@ class WebApplicationScanner:
         if not self.headers.get("X-Frame-Options"):
             self.logger.info(
                 "{} X-Frame-Options header not detected - target might be vulnerable to clickjacking".format(
-                    COLORED_COMBOS.GOOD
-                )
-            )
+                    COLORED_COMBOS.GOOD))
 
     def _xss_protection(self):
         xss_header = self.headers.get("X-XSS-PROTECTION")
@@ -119,7 +118,9 @@ class WebApplicationScanner:
 
     def _cors_wildcard(self):
         if self.headers.get("Access-Control-Allow-Origin") == "*":
-            self.logger.info("{} CORS wildcard detected".format(COLORED_COMBOS.GOOD))
+            self.logger.info(
+                "{} CORS wildcard detected".format(
+                    COLORED_COMBOS.GOOD))
 
     def _robots(self):
         res = self.request_handler.send(
@@ -141,7 +142,9 @@ class WebApplicationScanner:
             ),
         )
         if res.status_code != 404 and res.text and "<!DOCTYPE html>" not in res.text:
-            self.logger.info("{} Found sitemap.xml".format(COLORED_COMBOS.GOOD))
+            self.logger.info(
+                "{} Found sitemap.xml".format(
+                    COLORED_COMBOS.GOOD))
             with open("{}/sitemap.xml".format(self.target_dir), "w") as file:
                 file.write(res.text)
 
@@ -214,9 +217,7 @@ class WebApplicationScanner:
                 form_method = form.get("method")
                 self.logger.debug(
                     "\tForm details: ID: {}, Class: {}, Method: {}, action: {}".format(
-                        form_id, form_class, form_method, form_action
-                    )
-                )
+                        form_id, form_class, form_method, form_action))
 
     def _add_to_emails(self, href):
         self.emails.add(href)
@@ -267,7 +268,5 @@ class WebApplicationScanner:
             self.logger.info(
                 "{} Target does not seem to have an active web server on port: {}. "
                 "No web application data will be gathered.".format(
-                    COLORED_COMBOS.NOTIFY, self.host.port
-                )
-            )
+                    COLORED_COMBOS.NOTIFY, self.host.port))
             return

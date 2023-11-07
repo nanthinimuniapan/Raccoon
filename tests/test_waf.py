@@ -66,15 +66,21 @@ class TestWAFCName(unittest.TestCase):
         self.assertEqual(self.detect_by_cname(records), "Akamai")
 
     def test_second_akamai_detection(self):
-        records = {"example_edgesuite_example": "Akamai", "otherkey": "othervalue"}
+        records = {
+            "example_edgesuite_example": "Akamai",
+            "otherkey": "othervalue"}
         self.assertEqual(self.detect_by_cname(records), "Akamai")
 
     def test_third_akamai_detection(self):
-        records = {"example_edgekey_example": "Akamai", "otherkey": "othervalue"}
+        records = {
+            "example_edgekey_example": "Akamai",
+            "otherkey": "othervalue"}
         self.assertEqual(self.detect_by_cname(records), "Akamai")
 
     def test_incapsula_detection(self):
-        records = {"example.incapdns.or.not": "Incapsula", "otherkey": "othervalue"}
+        records = {
+            "example.incapdns.or.not": "Incapsula",
+            "otherkey": "othervalue"}
         self.assertEqual(self.detect_by_cname(records), "Incapsula")
 
     def test_distil_detection(self):

@@ -44,8 +44,7 @@ class URLFuzzer:
                 return set(fuzzlist)
         except FileNotFoundError:
             raise FuzzerException(
-                "Cannot open file {}. Will not perform Fuzzing".format(wordlist)
-            )
+                "Cannot open file {}. Will not perform Fuzzing".format(wordlist))
 
     def _log_response(self, code, url, headers):
         if 300 > code >= 200:
@@ -62,12 +61,14 @@ class URLFuzzer:
     def _build_request_url(self, uri, sub_domain):
         if not sub_domain:
             if self.port != 80 and self.port != 443:
-                url = "{}://{}:{}/{}".format(self.proto, self.target, self.port, uri)
+                url = "{}://{}:{}/{}".format(self.proto,
+                                             self.target, self.port, uri)
             else:
                 url = "{}://{}/{}".format(self.proto, self.target, uri)
         else:
             if self.port != 80 and self.port != 443:
-                url = "{}://{}.{}:{}".format(self.proto, uri, self.target, self.port)
+                url = "{}://{}.{}:{}".format(self.proto,
+                                             uri, self.target, self.port)
             else:
                 url = "{}://{}.{}".format(self.proto, uri, self.target)
         return url
@@ -104,8 +105,7 @@ class URLFuzzer:
             if sub_domain:
                 err_msg = (
                     "Wildcard subdomain support detected (all subdomains return 200)."
-                    " Will not bruteforce subdomains"
-                )
+                    " Will not bruteforce subdomains")
             else:
                 err_msg = (
                     "Web server seems to redirect requests for all resources "
@@ -120,9 +120,11 @@ class URLFuzzer:
         for uri in fake_uris:
             url = self._build_request_url(uri, sub_domain)
             try:
-                res = self.request_handler.send("GET", url=url, allow_redirects=True)
+                res = self.request_handler.send(
+                    "GET", url=url, allow_redirects=True)
                 response_codes.append(res.status_code)
-                res = session.get(url=url, allow_redirects=self.follow_redirects)
+                res = session.get(
+                    url=url, allow_redirects=self.follow_redirects)
                 response_codes.append(res.status_code)
             except RequestHandlerException as e:
                 if (
@@ -145,7 +147,8 @@ class URLFuzzer:
         """
         self.logger = self.get_log_file_path(log_file_path)
         try:
-            # Rule out wildcard subdomain support/all resources redirect to a 200 page
+            # Rule out wildcard subdomain support/all resources redirect to a
+            # 200 page
             response_codes = self._generate_fake_requests(sub_domain)
             self._rule_out_false_positives(response_codes, sub_domain)
 
@@ -157,11 +160,17 @@ class URLFuzzer:
                 )
             )
             pool = ThreadPool(self.num_threads)
-            pool.map(partial(self._fetch, sub_domain=sub_domain), self.wordlist)
+            pool.map(
+                partial(
+                    self._fetch,
+                    sub_domain=sub_domain),
+                self.wordlist)
             pool.close()
             pool.join()
             if not sub_domain:
-                self.logger.info("{} Done fuzzing URLs".format(COLORED_COMBOS.INFO))
+                self.logger.info(
+                    "{} Done fuzzing URLs".format(
+                        COLORED_COMBOS.INFO))
         except FuzzerException as e:
             self.logger.info("{} {}".format(COLORED_COMBOS.BAD, e))
         except ConnectionError as e:

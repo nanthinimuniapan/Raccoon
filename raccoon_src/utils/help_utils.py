@@ -27,7 +27,8 @@ class HelpUtilities:
                 if host.port == 443 or host.port == 80:
                     url = "{}://{}".format(host.protocol, host.target)
                 else:
-                    url = "{}://{}:{}".format(host.protocol, host.target, host.port)
+                    url = "{}://{}:{}".format(host.protocol,
+                                              host.target, host.port)
                 rh = RequestHandler()
                 rh.send("GET", url=url, timeout=15)
                 return
@@ -35,8 +36,8 @@ class HelpUtilities:
                 raise RaccoonException(
                     "Target {} seems to be down (no response to ping or from a web server"
                     " at port {}).\nRun with --skip-health-check to ignore hosts"
-                    " considered as down.".format(host, host.port)
-                )
+                    " considered as down.".format(
+                        host, host.port))
 
     @classmethod
     def parse_cookie_arg(cls, cookie_arg):
@@ -50,19 +51,21 @@ class HelpUtilities:
             raise RaccoonException(
                 "Cookie parsing error occurred, probably due to invalid cookie format.\n"
                 "Cookie format should be comma separated key:value pairs. Use --help "
-                "for more info."
-            )
+                "for more info.")
 
     @classmethod
     def validate_wordlist_args(cls, proxy_list, wordlist, subdomain_list):
         if proxy_list and not os.path.isfile(proxy_list):
-            raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
+            raise FileNotFoundError(
+                "Not a valid file path, {}".format(proxy_list))
 
         if wordlist and not os.path.isfile(wordlist):
-            raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
+            raise FileNotFoundError(
+                "Not a valid file path, {}".format(wordlist))
 
         if subdomain_list and not os.path.isfile(subdomain_list):
-            raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
+            raise FileNotFoundError(
+                "Not a valid file path, {}".format(wordlist))
 
     @classmethod
     def validate_port_range(cls, port_range):
@@ -115,8 +118,7 @@ class HelpUtilities:
             if not cls.find_mac_gtimeout_executable():
                 raise RaccoonException(
                     "To support Raccoon with macOS 'gtimeout' must be installed.\n"
-                    "gtimeout can be installed by running 'brew install coreutils'"
-                )
+                    "gtimeout can be installed by running 'brew install coreutils'")
         return
 
     @classmethod
@@ -168,8 +170,8 @@ class HelpUtilities:
                 payload["csrfmiddlewaretoken"] = c.__dict__.get("value")
                 break
             dnsdumpster_session.post(
-                url, data=payload, headers={"Referer": "https://dnsdumpster.com/"}
-            )
+                url, data=payload, headers={
+                    "Referer": "https://dnsdumpster.com/"})
 
             return dnsdumpster_session.get(
                 "https://dnsdumpster.com/static/map/{}.png".format(target)

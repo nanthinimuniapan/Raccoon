@@ -34,23 +34,25 @@ class TLSCipherSuiteChecker:
     @staticmethod
     def _color_warnings_and_weak_ciphers(result):
         for index, line in enumerate(result):
-            if line.endswith("- C") or line.endswith("- D") or line.endswith("- E"):
+            if line.endswith(
+                    "- C") or line.endswith("- D") or line.endswith("- E"):
                 colored = line + " - {}WEAK{}".format(COLOR.RED, COLOR.RESET)
                 result.insert(index, colored)
                 result.pop(index + 1)
             elif "warnings:" in line:
                 curr = index + 1
                 while (
-                    "TLSv" not in result[curr] and "least strength" not in result[curr]
-                ):
-                    colored = "{}{}{}".format(COLOR.RED, result[curr], COLOR.RESET)
+                        "TLSv" not in result[curr] and "least strength" not in result[curr]):
+                    colored = "{}{}{}".format(
+                        COLOR.RED, result[curr], COLOR.RESET)
                     result.insert(curr, colored)
                     result.pop(curr + 1)
                     curr += 1
         return result[1:]
 
     def _parse_cipher_scan_outpt(self, result):
-        result = [line for line in result.decode().strip().split("\n") if "|" in line]
+        result = [line for line in result.decode().strip().split("\n")
+                  if "|" in line]
         result = self._color_warnings_and_weak_ciphers(result)
         return "\n".join(result)
 
@@ -138,13 +140,12 @@ class TLSHandler(TLSCipherSuiteChecker):
         )
         result, err = await process.communicate()
         try:
-            if 'server extension "heartbeat" (id=15)' in result.decode().strip():
+            if 'server extension "heartbeat" (id=15)' in result.decode(
+            ).strip():
                 self.logger.info(
                     "{} Target seems to be vulnerable to Heartbleed - CVE-2014-016. "
                     "see http://heartbleed.com/ for more details.".format(
-                        COLORED_COMBOS.GOOD
-                    )
-                )
+                        COLORED_COMBOS.GOOD))
         except TypeError:  # Type error means no result
             pass
 
@@ -237,7 +238,9 @@ class TLSHandler(TLSCipherSuiteChecker):
         await self._is_heartbleed_vulnerable()
 
         if self._tls_results_exist():
-            self.logger.info("{} Done collecting TLS data".format(COLORED_COMBOS.INFO))
+            self.logger.info(
+                "{} Done collecting TLS data".format(
+                    COLORED_COMBOS.INFO))
             if self._are_certificates_identical():
                 self.non_sni_data["Certificate_details"] = "Same as SNI Certificate"
             self.write_up()
@@ -245,6 +248,4 @@ class TLSHandler(TLSCipherSuiteChecker):
             self.logger.info(
                 "{} Could not obtain any TLS data from target on port {}. "
                 "Target may not support SSL/TLS or supports it on a different port.".format(
-                    COLORED_COMBOS.BAD, self.port
-                )
-            )
+                    COLORED_COMBOS.BAD, self.port))

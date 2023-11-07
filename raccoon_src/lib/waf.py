@@ -49,7 +49,8 @@ class WAFApplicationMethods:
 
     @classmethod
     def detect_maxcdn(cls, res):
-        if SERVER in res.headers.keys() and "NetDNA-cache" in res.headers[SERVER]:
+        if SERVER in res.headers.keys(
+        ) and "NetDNA-cache" in res.headers[SERVER]:
             return True
         return
 
@@ -68,9 +69,8 @@ class WAFApplicationMethods:
 
     @classmethod
     def detect_reblaze(cls, res):
-        if res.headers.get(SERVER) == "Reblaze Secure Web Gateway" or res.cookies.get(
-            "rbzid"
-        ):
+        if res.headers.get(
+                SERVER) == "Reblaze Secure Web Gateway" or res.cookies.get("rbzid"):
             return True
         return
 
@@ -101,7 +101,8 @@ class WAF:
             "Sucuri": WAFApplicationMethods.detect_sucuri,
             "Reblaze": WAFApplicationMethods.detect_reblaze,
         }
-        log_file = HelpUtilities.get_output_path("{}/WAF.txt".format(self.host.target))
+        log_file = HelpUtilities.get_output_path(
+            "{}/WAF.txt".format(self.host.target))
         self.logger = Logger(log_file)
 
     def _waf_detected(self, name, where):
@@ -160,6 +161,4 @@ class WAF:
             self.logger.info(
                 "{} Target does not seem to have an active web server on port {}. "
                 "No WAF could be detected on an application level.".format(
-                    COLORED_COMBOS.NOTIFY, self.host.port
-                )
-            )
+                    COLORED_COMBOS.NOTIFY, self.host.port))
