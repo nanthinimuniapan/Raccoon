@@ -4,12 +4,15 @@ from platform import system
 from collections import Counter
 from subprocess import PIPE, check_call, CalledProcessError
 from requests.exceptions import ConnectionError
-from raccoon_src.utils.exceptions import RaccoonException, ScannerException, RequestHandlerException
+from raccoon_src.utils.exceptions import (
+    RaccoonException,
+    ScannerException,
+    RequestHandlerException,
+)
 from raccoon_src.utils.request_handler import RequestHandler
 
 
 class HelpUtilities:
-
     PATH = ""
 
     @classmethod
@@ -29,22 +32,26 @@ class HelpUtilities:
                 rh.send("GET", url=url, timeout=15)
                 return
             except (ConnectionError, RequestHandlerException):
-                raise RaccoonException("Target {} seems to be down (no response to ping or from a web server"
-                                       " at port {}).\nRun with --skip-health-check to ignore hosts"
-                                       " considered as down.".format(host, host.port))
+                raise RaccoonException(
+                    "Target {} seems to be down (no response to ping or from a web server"
+                    " at port {}).\nRun with --skip-health-check to ignore hosts"
+                    " considered as down.".format(host, host.port)
+                )
 
     @classmethod
     def parse_cookie_arg(cls, cookie_arg):
         try:
             cookies = {}
-            for c in cookie_arg.split(','):
+            for c in cookie_arg.split(","):
                 c = c.split(":")
                 cookies[c[0]] = c[1]
             return cookies
         except (IndexError, TypeError):
-            raise RaccoonException("Cookie parsing error occurred, probably due to invalid cookie format.\n"
-                                   "Cookie format should be comma separated key:value pairs. Use --help "
-                                   "for more info.")
+            raise RaccoonException(
+                "Cookie parsing error occurred, probably due to invalid cookie format.\n"
+                "Cookie format should be comma separated key:value pairs. Use --help "
+                "for more info."
+            )
 
     @classmethod
     def validate_wordlist_args(cls, proxy_list, wordlist, subdomain_list):
@@ -72,8 +79,10 @@ class HelpUtilities:
         if not supplied_proxies:
             return
         elif supplied_proxies > 1:
-            raise RaccoonException("Must specify only one of the following:\n"
-                                   "--tor-routing, --proxy-list, --proxy")
+            raise RaccoonException(
+                "Must specify only one of the following:\n"
+                "--tor-routing, --proxy-list, --proxy"
+            )
 
     @classmethod
     def determine_verbosity(cls, quiet):
@@ -98,12 +107,16 @@ class HelpUtilities:
     @classmethod
     def validate_executables(cls):
         if not (cls.find_nmap_executable() and cls.find_openssl_executable()):
-            raise RaccoonException("Could not find Nmap or OpenSSL "
-                                   "installed. Please install them and run Raccoon again.")
+            raise RaccoonException(
+                "Could not find Nmap or OpenSSL "
+                "installed. Please install them and run Raccoon again."
+            )
         if system() == "Darwin":
             if not cls.find_mac_gtimeout_executable():
-                raise RaccoonException("To support Raccoon with macOS 'gtimeout' must be installed.\n"
-                                       "gtimeout can be installed by running 'brew install coreutils'")
+                raise RaccoonException(
+                    "To support Raccoon with macOS 'gtimeout' must be installed.\n"
+                    "gtimeout can be installed by running 'brew install coreutils'"
+                )
         return
 
     @classmethod
@@ -127,9 +140,13 @@ class HelpUtilities:
             if "Congratulations. This browser is configured to use Tor." in page.text:
                 return
             elif "Sorry. You are not using Tor" in page.text:
-                raise RaccoonException("Traffic does not seem to be routed through Tor.\nExiting")
+                raise RaccoonException(
+                    "Traffic does not seem to be routed through Tor.\nExiting"
+                )
         except RequestHandlerException:
-            raise RaccoonException("Tor service seems to be down - not able to connect to 127.0.0.1:9050.\nExiting")
+            raise RaccoonException(
+                "Tor service seems to be down - not able to connect to 127.0.0.1:9050.\nExiting"
+            )
 
     @classmethod
     def query_dns_dumpster(cls, host):
@@ -141,10 +158,7 @@ class HelpUtilities:
             target = host.naked
         else:
             target = host.target
-        payload = {
-            "targetip": target,
-            "csrfmiddlewaretoken": None
-        }
+        payload = {"targetip": target, "csrfmiddlewaretoken": None}
         try:
             dnsdumpster_session.get(url, timeout=10)
             jar = dnsdumpster_session.cookies
@@ -153,9 +167,13 @@ class HelpUtilities:
                     continue
                 payload["csrfmiddlewaretoken"] = c.__dict__.get("value")
                 break
-            dnsdumpster_session.post(url, data=payload, headers={"Referer": "https://dnsdumpster.com/"})
+            dnsdumpster_session.post(
+                url, data=payload, headers={"Referer": "https://dnsdumpster.com/"}
+            )
 
-            return dnsdumpster_session.get("https://dnsdumpster.com/static/map/{}.png".format(target))
+            return dnsdumpster_session.get(
+                "https://dnsdumpster.com/static/map/{}.png".format(target)
+            )
         except ConnectionError:
             raise RaccoonException
 

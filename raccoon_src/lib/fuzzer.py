@@ -14,14 +14,14 @@ from raccoon_src.utils.logger import Logger
 
 
 class URLFuzzer:
-
-    def __init__(self,
-                 host,
-                 ignored_response_codes,
-                 num_threads,
-                 path_to_wordlist,
-                 follow_redirects=False):
-
+    def __init__(
+        self,
+        host,
+        ignored_response_codes,
+        num_threads,
+        path_to_wordlist,
+        follow_redirects=False,
+    ):
         self.target = host.target
         self.ignored_error_codes = ignored_response_codes
         self.proto = host.protocol
@@ -30,7 +30,9 @@ class URLFuzzer:
         self.path_to_wordlist = path_to_wordlist
         self.wordlist = self._create_set_from_wordlist_file(path_to_wordlist)
         self.follow_redirects = follow_redirects
-        self.request_handler = RequestHandler()  # Will get the single, already initiated instance
+        self.request_handler = (
+            RequestHandler()
+        )  # Will get the single, already initiated instance
         self.logger = None
 
     @staticmethod
@@ -41,7 +43,9 @@ class URLFuzzer:
                 fuzzlist = [x.replace("\n", "") for x in fuzzlist]
                 return set(fuzzlist)
         except FileNotFoundError:
-            raise FuzzerException("Cannot open file {}. Will not perform Fuzzing".format(wordlist))
+            raise FuzzerException(
+                "Cannot open file {}. Will not perform Fuzzing".format(wordlist)
+            )
 
     def _log_response(self, code, url, headers):
         if 300 > code >= 200:
@@ -53,8 +57,7 @@ class URLFuzzer:
             color = COLOR.RED
         else:
             color = COLOR.RESET
-        self.logger.info("\t{}[{}]{} {}".format(
-            color, code, COLOR.RESET, url))
+        self.logger.info("\t{}[{}]{} {}".format(color, code, COLOR.RESET, url))
 
     def _build_request_url(self, uri, sub_domain):
         if not sub_domain:
@@ -78,7 +81,9 @@ class URLFuzzer:
         url = self._build_request_url(uri, sub_domain=sub_domain)
 
         try:
-            res = self.request_handler.send("HEAD", url=url, allow_redirects=self.follow_redirects)
+            res = self.request_handler.send(
+                "HEAD", url=url, allow_redirects=self.follow_redirects
+            )
             if res.status_code not in self.ignored_error_codes:
                 self._log_response(res.status_code, url, res.headers)
         except (AttributeError, RequestHandlerException):
@@ -97,11 +102,15 @@ class URLFuzzer:
     def _rule_out_false_positives(response_codes, sub_domain):
         if any(code == 200 for code in response_codes):
             if sub_domain:
-                err_msg = "Wildcard subdomain support detected (all subdomains return 200)." \
-                          " Will not bruteforce subdomains"
+                err_msg = (
+                    "Wildcard subdomain support detected (all subdomains return 200)."
+                    " Will not bruteforce subdomains"
+                )
             else:
-                err_msg = "Web server seems to redirect requests for all resources " \
-                          "to eventually return 200. Will not bruteforce URLs"
+                err_msg = (
+                    "Web server seems to redirect requests for all resources "
+                    "to eventually return 200. Will not bruteforce URLs"
+                )
             raise FuzzerException(err_msg)
 
     def _generate_fake_requests(self, sub_domain):
@@ -116,11 +125,15 @@ class URLFuzzer:
                 res = session.get(url=url, allow_redirects=self.follow_redirects)
                 response_codes.append(res.status_code)
             except RequestHandlerException as e:
-                if sub_domain:  # If should-not-work.example.com doesn't resolve, no wildcard subdomain is present
+                if (
+                    sub_domain
+                ):  # If should-not-work.example.com doesn't resolve, no wildcard subdomain is present
                     return [0]
                 else:
-                    raise FuzzerException("Could not get a response from {}."
-                                          " Maybe target is down ?".format(self.target))
+                    raise FuzzerException(
+                        "Could not get a response from {}."
+                        " Maybe target is down ?".format(self.target)
+                    )
         return response_codes
 
     async def fuzz_all(self, sub_domain=False, log_file_path=None):
@@ -138,7 +151,11 @@ class URLFuzzer:
 
             if not sub_domain:
                 self.logger.info("{} Fuzzing URLs".format(COLORED_COMBOS.INFO))
-            self.logger.info("{} Reading from list: {}".format(COLORED_COMBOS.INFO, self.path_to_wordlist))
+            self.logger.info(
+                "{} Reading from list: {}".format(
+                    COLORED_COMBOS.INFO, self.path_to_wordlist
+                )
+            )
             pool = ThreadPool(self.num_threads)
             pool.map(partial(self._fetch, sub_domain=sub_domain), self.wordlist)
             pool.close()
@@ -149,5 +166,7 @@ class URLFuzzer:
             self.logger.info("{} {}".format(COLORED_COMBOS.BAD, e))
         except ConnectionError as e:
             if "Remote end closed connection without response" in str(e):
-                self.logger.info("{} {}. Target is actively closing connections - will not "
-                                 "bruteforce URLs".format(COLORED_COMBOS.BAD, str(e)))
+                self.logger.info(
+                    "{} {}. Target is actively closing connections - will not "
+                    "bruteforce URLs".format(COLORED_COMBOS.BAD, str(e))
+                )

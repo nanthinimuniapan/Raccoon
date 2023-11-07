@@ -1,37 +1,29 @@
-
-
 class XSS:
-
     def __init__(self):
         pass
 
 
 class LFI:
-
     def __init__(self):
         pass
 
 
 class RFI:
-
     def __init__(self):
         pass
 
 
 class Traversal:
-
     def __init__(self):
         pass
 
 
 class RCE:
-
     def __init__(self):
         pass
 
 
 class OWASPScanner:
-
     def __init__(self):
         self.running_threads = []
 

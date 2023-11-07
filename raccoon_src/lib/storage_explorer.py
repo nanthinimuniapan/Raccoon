@@ -13,7 +13,6 @@ BASE_S3_URL = "s3.amazonaws.com"
 
 
 class Storage:
-
     def __init__(self, host, logger):
         self.host = host
         self.logger = logger
@@ -30,11 +29,11 @@ class Storage:
         if url.startswith(HTTP):
             url = url.replace(HTTP, "")
             url = "".join([part for part in url.split("//") if part])
-            return HTTP+url
+            return HTTP + url
         else:
             url = url.replace(HTTPS, "")
             url = "".join([part for part in url.split("//") if part])
-            return HTTPS+url
+            return HTTPS + url
 
 
 # Is this a thing ??
@@ -47,18 +46,21 @@ class GoogleStorageHandler:
 
 
 class AmazonS3Handler(Storage):
-
     def __init__(self, host, logger):
         super().__init__(host, logger)
         self.s3_buckets = set()
 
     def _is_s3_url(self, src):
         # Not including third party Amazon host services - aka cdn.3rdparty.com
-        return any(("s3" in src and "amazonaws" in src,
-                    "cdn.{}".format(str(self.host.naked)) in src,
-                    "cdn.{}".format(self.host.target) in src,
-                    "cdn.{}".format(".".join(self.host.target.split(".")[1:])) in src,
-                    "cloudfront.net" in src))
+        return any(
+            (
+                "s3" in src and "amazonaws" in src,
+                "cdn.{}".format(str(self.host.naked)) in src,
+                "cdn.{}".format(self.host.target) in src,
+                "cdn.{}".format(".".join(self.host.target.split(".")[1:])) in src,
+                "cloudfront.net" in src,
+            )
+        )
 
     @staticmethod
     def _is_amazon_s3_bucket(res):
@@ -69,17 +71,23 @@ class AmazonS3Handler(Storage):
             bucket_url = [part for part in bucket.no_scheme_url.split("/") if part]
             bucket_len = len(bucket_url)
 
-            for i in range(bucket_len-1):
-                url = "/".join(bucket_url[:i+1])
+            for i in range(bucket_len - 1):
+                url = "/".join(bucket_url[: i + 1])
                 if url == BASE_S3_URL or url in self.storage_urls_found:
                     continue
 
                 self.storage_urls_found.add(url)
-                res = self.request_handler.send("GET", url=HTTPS+url)
+                res = self.request_handler.send("GET", url=HTTPS + url)
 
-                if res.status_code == 200 and res.headers.get("Content-Type") == "application/xml":
-                    self.logger.info("{} Vulnerable S3 bucket detected: {}{}{}. Enumerating sensitive files".format(
-                        COLORED_COMBOS.GOOD, COLOR.RED, url, COLOR.RESET))
+                if (
+                    res.status_code == 200
+                    and res.headers.get("Content-Type") == "application/xml"
+                ):
+                    self.logger.info(
+                        "{} Vulnerable S3 bucket detected: {}{}{}. Enumerating sensitive files".format(
+                            COLORED_COMBOS.GOOD, COLOR.RED, url, COLOR.RESET
+                        )
+                    )
                     bucket.vulnerable = True
                     self._scan_for_sensitive_files(res.text, url)
 
@@ -98,7 +106,6 @@ class AmazonS3Handler(Storage):
 
 
 class S3Bucket:
-
     def __init__(self, url):
         self.url = self._strip_resource_from_bucket(url)
         self.no_scheme_url = self._remove_scheme_from_url(self.url)
@@ -164,7 +171,11 @@ class StorageExplorer(AmazonS3Handler, GoogleStorageHandler, AzureStorageHandler
         for url in urls:
             self._add_to_found_storage(url)
         if self.s3_buckets:
-            self.logger.info("{} S3 buckets discovered. Testing for permissions".format(COLORED_COMBOS.NOTIFY))
+            self.logger.info(
+                "{} S3 buckets discovered. Testing for permissions".format(
+                    COLORED_COMBOS.NOTIFY
+                )
+            )
             for bucket in self.s3_buckets:
                 if bucket.no_scheme_url in self.storage_urls_found:
                     continue
@@ -174,9 +185,20 @@ class StorageExplorer(AmazonS3Handler, GoogleStorageHandler, AzureStorageHandler
             if self.num_files_found > 0:
                 self.logger.info(
                     "{} Found {}{}{} sensitive files in S3 buckets. inspect web scan logs for more information.".format(
-                        COLORED_COMBOS.GOOD, COLOR.GREEN, self.num_files_found, COLOR.RESET))
+                        COLORED_COMBOS.GOOD,
+                        COLOR.GREEN,
+                        self.num_files_found,
+                        COLOR.RESET,
+                    )
+                )
             elif any(b.vulnerable for b in self.s3_buckets):
-                self.logger.info("{} No sensitive files found in target's cloud storage".format(COLORED_COMBOS.BAD))
+                self.logger.info(
+                    "{} No sensitive files found in target's cloud storage".format(
+                        COLORED_COMBOS.BAD
+                    )
+                )
             else:
-                self.logger.info("{} Could not access target's cloud storage."
-                                 " All permissions are set properly".format(COLORED_COMBOS.BAD))
+                self.logger.info(
+                    "{} Could not access target's cloud storage."
+                    " All permissions are set properly".format(COLORED_COMBOS.BAD)
+                )

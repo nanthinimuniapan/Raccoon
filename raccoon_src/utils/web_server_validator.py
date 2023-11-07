@@ -2,11 +2,13 @@ from urllib3.exceptions import HTTPError
 from requests.exceptions import ConnectionError, TooManyRedirects
 from raccoon_src.utils.request_handler import RequestHandler
 from raccoon_src.utils.singleton import Singleton
-from raccoon_src.utils.exceptions import WebServerValidatorException, RequestHandlerException
+from raccoon_src.utils.exceptions import (
+    WebServerValidatorException,
+    RequestHandlerException,
+)
 
 
 class WebServerValidator(metaclass=Singleton):
-
     def __init__(self):
         self.request_handler = RequestHandler()
 
@@ -15,11 +17,7 @@ class WebServerValidator(metaclass=Singleton):
             self.request_handler.send(
                 "GET",
                 timeout=20,
-                url="{}://{}:{}".format(
-                    host.protocol,
-                    host.target,
-                    host.port
-                )
+                url="{}://{}:{}".format(host.protocol, host.target, host.port),
             )
             return True
         except RequestHandlerException:

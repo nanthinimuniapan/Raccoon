@@ -4,7 +4,6 @@ from raccoon_src.utils.exceptions import HostHandlerException
 
 
 class TestHost(unittest.TestCase):
-
     def setUp(self):
         self.TestHost = Host
         self.TestHost.create_host_dir_and_set_file_logger = lambda _: None

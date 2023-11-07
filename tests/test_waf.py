@@ -7,7 +7,6 @@ class Response:
 
 
 class TestWAFHttp(unittest.TestCase):
-
     def setUp(self):
         self.server = "Server"
         self.response = Response()
@@ -46,7 +45,6 @@ class TestWAFHttp(unittest.TestCase):
 
 
 class TestWAFCName(unittest.TestCase):
-
     def setUp(self):
         self.waf_cname_map = {
             "incapdns": "Incapsula",
@@ -55,7 +53,7 @@ class TestWAFCName(unittest.TestCase):
             "edgesuite": "Akamai",
             "distil": "Distil Networks",
             "cloudfront": "CloudFront",
-            "netdna-cdn": "MaxCDN"
+            "netdna-cdn": "MaxCDN",
         }
 
     def detect_by_cname(self, cnames):
@@ -64,38 +62,29 @@ class TestWAFCName(unittest.TestCase):
                 return self.waf_cname_map.get(waf)
 
     def test_akamai_detection(self):
-        records = {"some_akamai_dns_value": "Akamai",
-                   "otherkey": "othervalue"
-                   }
+        records = {"some_akamai_dns_value": "Akamai", "otherkey": "othervalue"}
         self.assertEqual(self.detect_by_cname(records), "Akamai")
 
     def test_second_akamai_detection(self):
-        records = {"example_edgesuite_example": "Akamai",
-                   "otherkey": "othervalue"
-                   }
+        records = {"example_edgesuite_example": "Akamai", "otherkey": "othervalue"}
         self.assertEqual(self.detect_by_cname(records), "Akamai")
 
     def test_third_akamai_detection(self):
-        records = {"example_edgekey_example": "Akamai",
-                   "otherkey": "othervalue"}
+        records = {"example_edgekey_example": "Akamai", "otherkey": "othervalue"}
         self.assertEqual(self.detect_by_cname(records), "Akamai")
 
     def test_incapsula_detection(self):
-        records = {"example.incapdns.or.not": "Incapsula",
-                   "otherkey": "othervalue"}
+        records = {"example.incapdns.or.not": "Incapsula", "otherkey": "othervalue"}
         self.assertEqual(self.detect_by_cname(records), "Incapsula")
 
     def test_distil_detection(self):
-        records = {"lolz.distil.kthx": "Distil Networks",
-                   "not": "real"}
+        records = {"lolz.distil.kthx": "Distil Networks", "not": "real"}
         self.assertEqual(self.detect_by_cname(records), "Distil Networks")
 
     def test_cloudfront_detection(self):
-        records = {"aws.cloudfront.is.it": "CloudFront",
-                   "AWS": "CO.UK"}
+        records = {"aws.cloudfront.is.it": "CloudFront", "AWS": "CO.UK"}
         self.assertEqual(self.detect_by_cname(records), "CloudFront")
 
     def test_maxcdn_detection(self):
-        records = {"mycdn.netdna-cdn.godmode": "MaxCDN",
-                   "HAI1.2": "IHAZAVAR"}
+        records = {"mycdn.netdna-cdn.godmode": "MaxCDN", "HAI1.2": "IHAZAVAR"}
         self.assertEqual(self.detect_by_cname(records), "MaxCDN")

@@ -2,7 +2,6 @@ import unittest
 
 
 class Cookie:
-
     def __init__(self):
         pass
 
@@ -12,8 +11,6 @@ class Response:
 
 
 class TestWebApplicationScanner(unittest.TestCase):
-
     def setUp(self):
         # cookie_jar = []
         pass
-

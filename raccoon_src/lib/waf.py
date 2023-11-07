@@ -11,12 +11,13 @@ SERVER = "Server"
 
 
 class WAFApplicationMethods:
-
     @classmethod
     def detect_cloudfront(cls, res):
         service = "CloudFront"
         waf_headers = ("Via", "X-cache")
-        if any(h in res.headers.keys() for h in waf_headers) and any(service.lower() in val for val in res.headers.values()):
+        if any(h in res.headers.keys() for h in waf_headers) and any(
+            service.lower() in val for val in res.headers.values()
+        ):
             return True
         if res.headers.get(SERVER) == service:
             return True
@@ -54,26 +55,30 @@ class WAFApplicationMethods:
 
     @classmethod
     def detect_sucuri(cls, res):
-        if any((
+        if any(
+            (
                 res.headers.get(SERVER) == "Sucuri/Cloudproxy",
                 "X-Sucuri-ID" in res.headers.keys(),
-                "X-Sucuri-Cache"in res.headers.keys(),
-                "Access Denied - Sucuri Website Firewall" in res.text)):
+                "X-Sucuri-Cache" in res.headers.keys(),
+                "Access Denied - Sucuri Website Firewall" in res.text,
+            )
+        ):
             return True
         return
 
     @classmethod
     def detect_reblaze(cls, res):
-        if res.headers.get(SERVER) == "Reblaze Secure Web Gateway" or res.cookies.get("rbzid"):
+        if res.headers.get(SERVER) == "Reblaze Secure Web Gateway" or res.cookies.get(
+            "rbzid"
+        ):
             return True
         return
 
 
 class WAF:
-
     def __init__(self, host):
         self.host = host
-        self.cnames = host.dns_results.get('CNAME')
+        self.cnames = host.dns_results.get("CNAME")
         self.request_handler = RequestHandler()
         self.web_server_validator = WebServerValidator()
         self.waf_present = False
@@ -84,7 +89,7 @@ class WAF:
             "edgesuite": "Akamai",
             "distil": "Distil Networks",
             "cloudfront": "CloudFront",
-            "netdna-cdn": "MaxCDN"
+            "netdna-cdn": "MaxCDN",
         }
         self.waf_app_method_map = {
             "CloudFront": WAFApplicationMethods.detect_cloudfront,
@@ -94,7 +99,7 @@ class WAF:
             "Edgecast": WAFApplicationMethods.detect_edgecast,
             "Distil Networks": WAFApplicationMethods.detect_distil,
             "Sucuri": WAFApplicationMethods.detect_sucuri,
-            "Reblaze": WAFApplicationMethods.detect_reblaze
+            "Reblaze": WAFApplicationMethods.detect_reblaze,
         }
         log_file = HelpUtilities.get_output_path("{}/WAF.txt".format(self.host.target))
         self.logger = Logger(log_file)
@@ -102,7 +107,9 @@ class WAF:
     def _waf_detected(self, name, where):
         self.logger.info(
             "{} Detected WAF presence in {}: {}{}{}".format(
-                COLORED_COMBOS.BAD, where, COLOR.RED, name, COLOR.RESET))
+                COLORED_COMBOS.BAD, where, COLOR.RED, name, COLOR.RESET
+            )
+        )
         self.waf_present = True
 
     def _detect_by_cname(self):
@@ -117,10 +124,8 @@ class WAF:
                 timeout=20,
                 allow_redirects=True,
                 url="{}://{}:{}".format(
-                    self.host.protocol,
-                    self.host.target,
-                    self.host.port
-                )
+                    self.host.protocol, self.host.target, self.host.port
+                ),
             )
             for waf, method in self.waf_app_method_map.items():
                 result = method(response)
@@ -128,11 +133,17 @@ class WAF:
                     self._waf_detected(waf, "web application")
 
         except (ConnectionError, TooManyRedirects) as e:
-            raise WAFException("Couldn't get response from server.\n"
-                               "Caused due to exception: {}".format(str(e)))
+            raise WAFException(
+                "Couldn't get response from server.\n"
+                "Caused due to exception: {}".format(str(e))
+            )
 
     async def detect(self):
-        self.logger.info("{} Trying to detect WAF presence in {}".format(COLORED_COMBOS.INFO, self.host))
+        self.logger.info(
+            "{} Trying to detect WAF presence in {}".format(
+                COLORED_COMBOS.INFO, self.host
+            )
+        )
         if self.cnames:
             self._detect_by_cname()
         try:
@@ -140,8 +151,15 @@ class WAF:
             await self._detect_by_application()
 
             if not self.waf_present:
-                self.logger.info("{} Did not detect WAF presence in target".format(COLORED_COMBOS.GOOD))
+                self.logger.info(
+                    "{} Did not detect WAF presence in target".format(
+                        COLORED_COMBOS.GOOD
+                    )
+                )
         except WebServerValidatorException:
             self.logger.info(
                 "{} Target does not seem to have an active web server on port {}. "
-                "No WAF could be detected on an application level.".format(COLORED_COMBOS.NOTIFY, self.host.port))
+                "No WAF could be detected on an application level.".format(
+                    COLORED_COMBOS.NOTIFY, self.host.port
+                )
+            )

@@ -11,6 +11,7 @@ class SystemOutLogger(metaclass=Singleton):
     Logs to stdout - other loggers call its functions to log to stdout
     in addition to their own file-writing logging
     """
+
     def __init__(self, level="INFO"):
         self.level = level
         self.logger = self.get_logger()
@@ -20,7 +21,7 @@ class SystemOutLogger(metaclass=Singleton):
         logger.setLevel(self.level)
 
         out_handler = logging.StreamHandler(stdout)
-        formatter = logging.Formatter('%(message)s')
+        formatter = logging.Formatter("%(message)s")
         out_handler.setFormatter(formatter)
         logger.addHandler(out_handler)
         return logger
@@ -59,7 +60,7 @@ class Logger:
         logger.setLevel("DEBUG")
 
         out_handler = logging.FileHandler(self.outfile)
-        formatter = logging.Formatter('%(message)s')
+        formatter = logging.Formatter("%(message)s")
         out_handler.setFormatter(formatter)
         logger.addHandler(out_handler)
         return logger

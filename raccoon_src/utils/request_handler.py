@@ -1,7 +1,13 @@
 import random
 from fake_useragent import UserAgent
 from requests import request, Session, utils as requests_utils
-from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError, ConnectTimeout, ReadTimeout
+from requests.exceptions import (
+    ProxyError,
+    TooManyRedirects,
+    ConnectionError,
+    ConnectTimeout,
+    ReadTimeout,
+)
 from urllib3.exceptions import NewConnectionError
 from raccoon_src.utils.exceptions import RequestHandlerException
 from raccoon_src.utils.singleton import Singleton
@@ -12,12 +18,15 @@ class RequestHandler(metaclass=Singleton):
     A wrapper for request sending and session creating.
     Used to abstract proxy/tor routing to avoid repeating configurations for each module
     """
-    def __init__(self,
-                 proxy_list=None,
-                 tor_routing=False,
-                 single_proxy=None,
-                 delay=None,
-                 cookies=None):
+
+    def __init__(
+        self,
+        proxy_list=None,
+        tor_routing=False,
+        single_proxy=None,
+        delay=None,
+        cookies=None,
+    ):
         self.proxy_list = proxy_list
         self.tor_routing = tor_routing
         self.delay = delay
@@ -44,7 +53,7 @@ class RequestHandler(metaclass=Singleton):
         if self.tor_routing:
             proxies = {
                 "http": "socks5://127.0.0.1:9050",
-                "https": "socks5://127.0.0.1:9050"
+                "https": "socks5://127.0.0.1:9050",
             }
         elif self.proxy_list:
             try:
@@ -52,12 +61,11 @@ class RequestHandler(metaclass=Singleton):
                     file = file.readlines()
                     proxies = [x.replace("\n", "") for x in file]
             except FileNotFoundError:
-                raise RequestHandlerException("Cannot read proxies from {}".format(self.proxy_list))
+                raise RequestHandlerException(
+                    "Cannot read proxies from {}".format(self.proxy_list)
+                )
         elif self.single_proxy:
-            proxies = {
-                "http": self.single_proxy,
-                "https": self.single_proxy
-            }
+            proxies = {"http": self.single_proxy, "https": self.single_proxy}
         return proxies
 
     def _get_request_proxies(self):
@@ -65,13 +73,20 @@ class RequestHandler(metaclass=Singleton):
             proxies = self.proxies
         elif self.proxy_list:
             if not self.proxies:
-                raise RequestHandlerException("No valid proxies left in proxy list. Exiting.")
+                raise RequestHandlerException(
+                    "No valid proxies left in proxy list. Exiting."
+                )
             else:
                 try:
                     prx = random.choice(self.proxies)
-                    proxies = {proto: "{}://{}".format(proto, prx) for proto in ("http", "https")}
+                    proxies = {
+                        proto: "{}://{}".format(proto, prx)
+                        for proto in ("http", "https")
+                    }
                 except IndexError:
-                    raise RequestHandlerException("No valid proxies left in proxy list. Exiting.")
+                    raise RequestHandlerException(
+                        "No valid proxies left in proxy list. Exiting."
+                    )
         else:
             proxies = self.proxies
         return proxies
@@ -85,8 +100,15 @@ class RequestHandler(metaclass=Singleton):
 
         try:
             if method.upper() in self.allowed_methods:
-                kwargs['timeout'] = kwargs['timeout'] if 'timeout' in kwargs else 5
-                return request(method, proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
+                kwargs["timeout"] = kwargs["timeout"] if "timeout" in kwargs else 5
+                return request(
+                    method,
+                    proxies=proxies,
+                    headers=self.headers,
+                    cookies=self.cookies,
+                    *args,
+                    **kwargs
+                )
             else:
                 raise RequestHandlerException("Unsupported method: {}".format(method))
         except ProxyError:
@@ -101,7 +123,9 @@ class RequestHandler(metaclass=Singleton):
             # TODO: Increase delay
             raise RequestHandlerException("Error connecting to host")
         except TooManyRedirects:
-            raise RequestHandlerException("Infinite redirects detected - too many redirects error")
+            raise RequestHandlerException(
+                "Infinite redirects detected - too many redirects error"
+            )
         except UnicodeDecodeError:
             # Following issue #19, apparently some sites do not use utf-8 in their uris :<>
             pass
