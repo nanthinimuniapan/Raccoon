@@ -40,12 +40,12 @@ jobs:
       run: |
          python -m unittest tests/* 
          #pytest
-    - name: Analysing the code with pylint
-      run: |
-        pylint $(git ls-files '*.py')
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag racoon-security:$(date +%s)
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
       with:
         category: "/language:${{matrix.language}}"
+    - name: Analysing the code with pylint
+      run: |
+        pylint $(git ls-files '*.py')
