@@ -1,0 +1,6 @@
+# .pylintrc
+[MASTER]
+disable=
+    C0114, # missing-module-docstring
+    C0115, # for missing-class-docstring
+    C0116  # for missing-function-docstring
